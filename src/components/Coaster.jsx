@@ -3,6 +3,8 @@ function Coaster(props) {
         console.log(props.name)
 
     }
+
+    
   return (
     <div className="card">
         <h2>{props.name}</h2>
