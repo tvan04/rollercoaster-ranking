@@ -12,9 +12,6 @@ function App() {
       <div>
         <h1>Rollercoaster Ranking</h1>
         <Searchbar/>
-        <Coaster name="Fury 325" />
-        <Coaster name="Millennium Force" />
-        <Coaster name="Steel Vengeance" />
       </div>
     </>
   );

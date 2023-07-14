@@ -1,20 +1,21 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
+import Coaster from './Coaster';
 import './Searchbar.css';
-let API_KEY = atob('MzhkNWU2Y2QtYmFkNC00OTYxLWE3YTgtODhiYmQ3N2IwMTlh')
-
 
 const Searchbar = () => {
   const [coasters, setCoasters] = useState([]);
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [selectedCoasters, setSelectedCoasters] = useState([]);
 
   useEffect(() => {
     const loadCoasters = async () => {
+      const API_KEY = atob('MzhkNWU2Y2QtYmFkNC00OTYxLWE3YTgtODhiYmQ3N2IwMTlh');
       const URL = `https://vast-garden-04559.herokuapp.com/https://captaincoaster.com/api/coasters?page=1&name=${query}`;
       const res = await fetch(URL, {
         headers: {
-          'X-AUTH-TOKEN': API_KEY
-        }
+          'X-AUTH-TOKEN': API_KEY,
+        },
       });
       const data = await res.json();
       if (data['hydra:totalItems'] > 0) {
@@ -44,22 +45,23 @@ const Searchbar = () => {
 
   const displayCoasterList = (coasters) => {
     setCoasters(coasters);
-    loadGuess();
   };
 
   const handleCoasterClick = (id) => {
-    // Handle the click event for a specific coaster
-    console.log(`Clicked coaster with ID: ${id}`);
-    //TODO: Add to the list of coasters 
+    const selectedCoaster = coasters.find((coaster) => coaster.id === id);
+    if (selectedCoaster) {
+      setSelectedCoasters([...selectedCoasters, selectedCoaster]);
+    }
+  };
+
+  const handleDeleteCoaster = (id) => {
+    const updatedCoasters = selectedCoasters.filter((coaster) => coaster.id !== id);
+    setSelectedCoasters(updatedCoasters);
   };
 
   return (
     <div>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} />
       {showResults && (
         <ul className="coaster-results">
           {coasters.map((coaster) => (
@@ -77,8 +79,18 @@ const Searchbar = () => {
           ))}
         </ul>
       )}
+      <div>
+        {selectedCoasters.map((coaster) => (
+          <Coaster
+            key={coaster.id}
+            id={coaster.id}
+            name={coaster.name}
+            onDeleteCoaster={handleDeleteCoaster}
+          />
+        ))}
+      </div>
     </div>
   );
 };
 
-export default Searchbar
+export default Searchbar;
