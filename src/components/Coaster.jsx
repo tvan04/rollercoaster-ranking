@@ -8,6 +8,7 @@ function Coaster(props) {
   return (
     <div className="card">
       <h2>{props.name}</h2>
+      <h3>{props.park.name}</h3>
       <div className="actions">
         <button className="btn">About</button>
         <button className="btn">+</button>

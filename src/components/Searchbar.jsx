@@ -62,13 +62,14 @@ const Searchbar = () => {
   };
 
   return (
-    <div id='searchbar'>
+    <div id="searchbar">
       <input
         type="text"
         value={query}
         placeholder="Search for a coaster"
         onChange={(e) => setQuery(e.target.value)}
       />
+
       {showResults && (
         <ul className="coaster-results">
           {coasters.map((coaster) => (
@@ -86,12 +87,13 @@ const Searchbar = () => {
           ))}
         </ul>
       )}
-      <div id = 'coasters-container'>
+      <div id="coasters-container">
         {selectedCoasters.map((coaster) => (
           <Coaster
             key={coaster.id}
             id={coaster.id}
             name={coaster.name}
+            park={coaster.park}
             onDeleteCoaster={handleDeleteCoaster}
           />
         ))}

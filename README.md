@@ -1,5 +1,5 @@
 # rollercoaster-ranking
-Website to rank and keep track of rollercoaster you've ridden 
+Website to rank and keep track of rollercoasters you've ridden 
 
 Uses Captain Coaster API for rollercoaster data:
 https://captaincoaster.com/api 
