@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import Coaster from './Coaster';
-import './Searchbar.css';
+import React, { useState, useEffect } from "react";
+import Coaster from "./Coaster";
+import "./Searchbar.css";
 
 const Searchbar = () => {
   const [coasters, setCoasters] = useState([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedCoasters, setSelectedCoasters] = useState([]);
 
   useEffect(() => {
     const loadCoasters = async () => {
-      const API_KEY = atob('MzhkNWU2Y2QtYmFkNC00OTYxLWE3YTgtODhiYmQ3N2IwMTlh');
+      const API_KEY = atob("MzhkNWU2Y2QtYmFkNC00OTYxLWE3YTgtODhiYmQ3N2IwMTlh");
       const URL = `https://vast-garden-04559.herokuapp.com/https://captaincoaster.com/api/coasters?page=1&name=${query}`;
       const res = await fetch(URL, {
         headers: {
-          'X-AUTH-TOKEN': API_KEY,
+          "X-AUTH-TOKEN": API_KEY,
         },
       });
       const data = await res.json();
-      if (data['hydra:totalItems'] > 0) {
-        displayCoasterList(data['hydra:member']);
+      if (data["hydra:totalItems"] > 0) {
+        displayCoasterList(data["hydra:member"]);
       }
     };
 
@@ -55,13 +55,20 @@ const Searchbar = () => {
   };
 
   const handleDeleteCoaster = (id) => {
-    const updatedCoasters = selectedCoasters.filter((coaster) => coaster.id !== id);
+    const updatedCoasters = selectedCoasters.filter(
+      (coaster) => coaster.id !== id
+    );
     setSelectedCoasters(updatedCoasters);
   };
 
   return (
-    <div>
-      <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} />
+    <div id='searchbar'>
+      <input
+        type="text"
+        value={query}
+        placeholder="Search for a coaster"
+        onChange={(e) => setQuery(e.target.value)}
+      />
       {showResults && (
         <ul className="coaster-results">
           {coasters.map((coaster) => (
@@ -79,7 +86,7 @@ const Searchbar = () => {
           ))}
         </ul>
       )}
-      <div>
+      <div id = 'coasters-container'>
         {selectedCoasters.map((coaster) => (
           <Coaster
             key={coaster.id}

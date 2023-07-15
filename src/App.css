@@ -1,34 +1,54 @@
 * {
-  background-color: lightblue;
+  background-color: white;
 }
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+.header {
+  text-align: center;
 }
-
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  text-align: center;
+}
+
+.container {
+  display: flex;
+  text-align: center;
+  margin: 0;
+  flex: 1;
+}
+
+#search {
+  height: 100%;
+  width: 400px;
+  left: 0;
+  overflow: hidden;
+  padding-top: 20px;
+  position: fixed;
+  border: 1px solid #ccc;
+  background: blue;
+}
+
+#coasters {
+  text-align: center;
+  margin: auto;
+  float: right;
+  flex: 1 0 auto;
+}
+
+.card {
+  text-align: center;
+  margin: auto;
 }
 
 button {
@@ -42,9 +62,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;

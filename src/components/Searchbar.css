@@ -1,17 +1,21 @@
+#searchbar {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .coaster-results {
   position: absolute;
   background-color: #fff;
-  border: 1px solid #ccc;
-  max-height: 200px;
+
+  max-height: 500px;
   overflow-y: auto;
   list-style-type: none;
-  padding: 0;
+  padding: 0 0 0 0;
   margin: 0;
   width: 100%;
   z-index: 1;
 }
-
-
 
 .coaster-result-item {
   padding: 1px;
@@ -19,7 +23,7 @@
 }
 
 .coaster-result-item:hover {
-  background-color: #f5f5f5;
+  background-color: #000000;
 }
 
 .coaster-result-info {
@@ -31,6 +35,7 @@
   margin: 0;
   font-size: 16px;
   font-weight: bold;
+
 }
 
 .coaster-result-info p {
@@ -39,6 +44,3 @@
   color: #888;
 }
 
-.coaster-result-info:hover {
-  background-color: #f5f5f5;
-}
