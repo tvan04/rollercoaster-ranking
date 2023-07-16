@@ -1,0 +1,65 @@
+.card {
+  display: flex;
+  border-radius: 8px;
+  border: 1px solid rgb(141, 141, 141);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #fdfdfd;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  justify-content: space-between;
+  margin: 1em;
+  align-items: center;
+}
+
+.card h1 {
+  margin-left: 1em;
+  font-size: 2em;
+  font-weight: 500;
+}
+
+.card h2 {
+  font-weight: bold;
+}
+
+.card p {
+}
+
+.card:hover {
+  background-color: #cfcfcf;
+}
+
+.card:focus,
+.card:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1em;
+  float: right;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid rgb(141, 141, 141);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #fdfdfd;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  background-color: #fe3f3f;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}

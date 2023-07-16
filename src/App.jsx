@@ -5,7 +5,7 @@ import Coaster from "./components/Coaster";
 import Searchbar from "./components/Searchbar";
 
 function App() {
-  //Where the coasters selected from the searchbar are stored 
+  //Where the coasters selected from the searchbar are stored
   const [selectedCoasters, setSelectedCoasters] = useState([]);
 
   //Function to add a coaster to the selectedCoasters array
@@ -39,13 +39,18 @@ function App() {
           <Searchbar onCoasterSelection={handleCoasterSelection} />
         </div>
         <div id="coasters">
-          <h2>Coaster Ranking</h2>
+          <div id="labels">
+            <h2>Rank</h2>
+            <h2>Coaster</h2>
+            <h2>Park</h2>
+          </div>
+
           {selectedCoasters.map((coaster) => (
             <Coaster
-              key={coaster.id}
               id={coaster.id}
               name={coaster.name}
               park={coaster.park}
+              rank={coaster.rank}
               onDeleteCoaster={handleDeleteCoaster}
             />
           ))}

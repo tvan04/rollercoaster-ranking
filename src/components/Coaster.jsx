@@ -1,4 +1,5 @@
 import React from "react";
+import "./Coaster.css";
 
 function Coaster(props) {
   function deleteCoaster() {
@@ -7,12 +8,10 @@ function Coaster(props) {
 
   return (
     <div className="card">
+      <h1>{props.rank}</h1> {/* Added rank */}
       <h2>{props.name}</h2>
-      <h3>{props.park.name}</h3>
-      <div className="actions">
-        <button className="btn">About</button>
-        <button className="btn">+</button>
-        <button className="btn">-</button>
+      <p>{props.park.name}</p>
+      <div className="buttons">
         <button className="btn" onClick={deleteCoaster}>
           🗑️
         </button>
