@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import Coaster from "./Coaster";
 import "./Searchbar.css";
 
-const Searchbar = () => {
+const Searchbar = ({ onCoasterSelection }) => {
   const [coasters, setCoasters] = useState([]);
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedCoasters, setSelectedCoasters] = useState([]);
 
+  //function to load coasters from api
   useEffect(() => {
     const loadCoasters = async () => {
       const API_KEY = atob("MzhkNWU2Y2QtYmFkNC00OTYxLWE3YTgtODhiYmQ3N2IwMTlh");
@@ -24,7 +24,7 @@ const Searchbar = () => {
     };
 
     let debounce;
-
+    //function to search for coasters in api
     const findCoasters = () => {
       const trimmedQuery = query.trim();
       if (trimmedQuery.length > 0) {
@@ -43,22 +43,18 @@ const Searchbar = () => {
     return () => clearTimeout(debounce);
   }, [query]);
 
+  //function to display coasters in searchbar
   const displayCoasterList = (coasters) => {
     setCoasters(coasters);
   };
 
+  //function to pass a coaster to App.js
   const handleCoasterClick = (id) => {
     const selectedCoaster = coasters.find((coaster) => coaster.id === id);
     if (selectedCoaster) {
       setSelectedCoasters([...selectedCoasters, selectedCoaster]);
+      onCoasterSelection(selectedCoaster); // Pass the selected coaster back to App.js
     }
-  };
-
-  const handleDeleteCoaster = (id) => {
-    const updatedCoasters = selectedCoasters.filter(
-      (coaster) => coaster.id !== id
-    );
-    setSelectedCoasters(updatedCoasters);
   };
 
   return (
@@ -87,17 +83,6 @@ const Searchbar = () => {
           ))}
         </ul>
       )}
-      <div id="coasters-container">
-        {selectedCoasters.map((coaster) => (
-          <Coaster
-            key={coaster.id}
-            id={coaster.id}
-            name={coaster.name}
-            park={coaster.park}
-            onDeleteCoaster={handleDeleteCoaster}
-          />
-        ))}
-      </div>
     </div>
   );
 };
