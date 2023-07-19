@@ -40,9 +40,10 @@ function App() {
         </div>
         <div id="coasters">
           <div id="labels">
-            <h2>Rank</h2>
-            <h2>Coaster</h2>
-            <h2>Park</h2>
+            <h2 id="label1">Rank</h2>
+            <h2 id="label2">Coaster</h2>
+            <h2 id="label3">Park</h2>
+            <h2 id="label4">temp</h2>
           </div>
 
           {selectedCoasters.map((coaster) => (

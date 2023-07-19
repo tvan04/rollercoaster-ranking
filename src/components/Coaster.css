@@ -9,22 +9,24 @@
   background-color: #fdfdfd;
   cursor: pointer;
   transition: border-color 0.25s;
-  justify-content: space-between;
   margin: 1em;
   align-items: center;
 }
 
 .card h1 {
-  margin-left: 1em;
   font-size: 2em;
   font-weight: 500;
+  flex: 1;
+  
 }
 
 .card h2 {
   font-weight: bold;
+  flex: 2;
 }
 
 .card p {
+  flex: 2;
 }
 
 .card:hover {
@@ -38,9 +40,7 @@
 
 .buttons {
   display: flex;
-  justify-content: space-between;
   margin-top: 1em;
-  float: right;
 }
 
 button {
