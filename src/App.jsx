@@ -1,6 +1,5 @@
 import { useState } from "react";
 import "./App.css";
-import card from "./components/Coaster";
 import Coaster from "./components/Coaster";
 import Searchbar from "./components/Searchbar";
 
@@ -22,6 +21,11 @@ function App() {
       prevSelectedCoasters.filter((coaster) => coaster.id !== id)
     );
   };
+
+  //Function to sort the selectedCoasters array by rank
+  const sortedSelectedCoasters = selectedCoasters.slice().sort((a, b) => {
+    return a.rank - b.rank;
+  });
 
   return (
     <>
@@ -46,8 +50,9 @@ function App() {
             <h2 id="label4">temp</h2>
           </div>
 
-          {selectedCoasters.map((coaster) => (
+          {sortedSelectedCoasters.map((coaster) => (
             <Coaster
+              key={coaster.id}
               id={coaster.id}
               name={coaster.name}
               park={coaster.park}

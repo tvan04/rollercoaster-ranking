@@ -6,6 +6,8 @@ const Searchbar = ({ onCoasterSelection }) => {
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedCoasters, setSelectedCoasters] = useState([]);
+  const [rankInput, setRankInput] = useState("");
+  const [selectedCoaster, setSelectedCoaster] = useState(null); // Track the selected coaster separately
 
   //function to load coasters from api
   useEffect(() => {
@@ -48,12 +50,26 @@ const Searchbar = ({ onCoasterSelection }) => {
     setCoasters(coasters);
   };
 
-  //function to pass a coaster to App.js
-  const handleCoasterClick = (id) => {
+  const handleCoasterSelect = (id) => {
     const selectedCoaster = coasters.find((coaster) => coaster.id === id);
     if (selectedCoaster) {
-      setSelectedCoasters([...selectedCoasters, selectedCoaster]);
-      onCoasterSelection(selectedCoaster); // Pass the selected coaster back to App.js
+      setSelectedCoaster(selectedCoaster); // Set the selected coaster separately
+      setQuery("");
+      setShowResults(false);
+    }
+  };
+
+  // Function to handle adding a rank to the last selected coaster
+  const handleAddRank = () => {
+    if (selectedCoaster && rankInput.trim() !== "") {
+      const newCoaster = {
+        ...selectedCoaster,
+        rank: rankInput,
+      };
+      setSelectedCoaster(null); // Reset the selected coaster after adding the rank
+      setSelectedCoasters([...selectedCoasters, newCoaster]);
+      setRankInput(""); // Clear the rank input after adding the coaster
+      onCoasterSelection(newCoaster); // Call onCoasterSelection with updated selectedCoasters
     }
   };
 
@@ -61,9 +77,14 @@ const Searchbar = ({ onCoasterSelection }) => {
     <div id="searchbar">
       <input
         type="text"
-        value={query}
+        value={selectedCoaster ? selectedCoaster.name : query}
         placeholder="Search for a coaster"
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          if (selectedCoaster) {
+            setSelectedCoaster(null);
+          }
+          setQuery(e.target.value);
+        }}
       />
 
       {showResults && (
@@ -73,9 +94,11 @@ const Searchbar = ({ onCoasterSelection }) => {
               key={coaster.id}
               className="coaster-result-item"
               data-id={coaster.id}
-              onClick={() => handleCoasterClick(coaster.id)}
             >
-              <div className="coaster-result-info">
+              <div
+                className="coaster-result-info"
+                onClick={() => handleCoasterSelect(coaster.id)}
+              >
                 <h3>{coaster.name}</h3>
                 <p>{coaster.park.name}</p>
               </div>
@@ -83,6 +106,18 @@ const Searchbar = ({ onCoasterSelection }) => {
           ))}
         </ul>
       )}
+
+      <div id="rank">
+        <input
+          type="text"
+          placeholder="Enter rank"
+          value={rankInput}
+          onChange={(e) => setRankInput(e.target.value)}
+        />
+        <div id="add">
+          <button onClick={handleAddRank}>Add</button>
+        </div>
+      </div>
     </div>
   );
 };

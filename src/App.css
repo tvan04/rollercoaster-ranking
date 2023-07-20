@@ -52,12 +52,13 @@ h1 {
 #labels {
   display: flex;
   align-items: center;
+  border: 1px solid #ccc;
 }
 #label1 {
-  flex: 2.2;
+  flex: 2.3;
 }
 #label2 {
-  flex: 2.7;
+  flex: 2.9;
 }
 
 #label3 {
