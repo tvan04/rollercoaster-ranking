@@ -1,5 +1,6 @@
 import React from "react";
 import "./Coaster.css";
+import { Draggable } from "react-beautiful-dnd";
 
 function Coaster(props) {
   function deleteCoaster() {

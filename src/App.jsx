@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Coaster from "./components/Coaster";
 import Searchbar from "./components/Searchbar";
 
@@ -27,6 +28,40 @@ function App() {
     return a.rank - b.rank;
   });
 
+  const onDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const updatedCoasters = Array.from(selectedCoasters);
+    const movedCoaster = updatedCoasters.find(
+      (coaster) => coaster.id.toString() === draggableId
+    );
+
+    const startIndex = source.index;
+    const endIndex = destination.index;
+    updatedCoasters.splice(startIndex, 1);
+    updatedCoasters.splice(endIndex, 0, movedCoaster);
+
+    // Update the rank of the moved coaster based on its new position and rearrange other coasters accordingly
+    for (let i = 0; i < updatedCoasters.length; i++) {
+      const coaster = updatedCoasters[i];
+      coaster.rank = i + 1;
+    }
+
+    // Update the state with the rearranged and updated selectedCoasters array
+    setSelectedCoasters(updatedCoasters);
+  };
+
   return (
     <>
       <div className="header">
@@ -49,17 +84,39 @@ function App() {
             <h2 id="label3">Park</h2>
             <h2 id="label4">temp</h2>
           </div>
-
-          {sortedSelectedCoasters.map((coaster) => (
-            <Coaster
-              key={coaster.id}
-              id={coaster.id}
-              name={coaster.name}
-              park={coaster.park}
-              rank={coaster.rank}
-              onDeleteCoaster={handleDeleteCoaster}
-            />
-          ))}
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="coaster-list">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {sortedSelectedCoasters.map((coaster, index) => (
+                    <Draggable
+                      key={coaster.id.toString() + index}
+                      draggableId={coaster.id.toString()}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                        >
+                          <Coaster
+                            key={coaster.id}
+                            id={coaster.id}
+                            name={coaster.name}
+                            park={coaster.park}
+                            rank={coaster.rank}
+                            onDeleteCoaster={handleDeleteCoaster}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
     </>
