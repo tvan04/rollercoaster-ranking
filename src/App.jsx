@@ -3,6 +3,7 @@ import "./App.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Coaster from "./components/Coaster";
 import Searchbar from "./components/Searchbar";
+import { signInWithGoogle } from "./Firebase";
 
 function App() {
   //Where the coasters selected from the searchbar are stored
@@ -70,6 +71,7 @@ function App() {
           Rank your favorite rollercoasters! Search and select the rollercoaster
           you want to rank and drag it to your desired position.
         </p>
+        <button onClick={signInWithGoogle}>Sign in with Google</button>
       </div>
 
       <div className="container">
