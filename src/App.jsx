@@ -66,12 +66,13 @@ function App() {
   return (
     <>
       <div className="header">
+      <button onClick={signInWithGoogle}>Sign in with Google</button>
         <h1>Rollercoaster Ranking</h1>
         <p>
           Rank your favorite rollercoasters! Search and select the rollercoaster
           you want to rank and drag it to your desired position.
         </p>
-        <button onClick={signInWithGoogle}>Sign in with Google</button>
+        
       </div>
 
       <div className="container">
@@ -79,14 +80,14 @@ function App() {
           <h2>Add Coasters</h2>
           <Searchbar onCoasterSelection={handleCoasterSelection} />
         </div>
-        <div id="coasters">
-          <div id="labels">
-            <h2 id="label1">Rank</h2>
-            <h2 id="label2">Coaster</h2>
-            <h2 id="label3">Park</h2>
-            <h2 id="label4">temp</h2>
-          </div>
-          <DragDropContext onDragEnd={onDragEnd}>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div id="coasters">
+            <div id="labels">
+              <h2 id="label1">Rank</h2>
+              <h2 id="label2">Coaster</h2>
+              <h2 id="label3">Park</h2>
+              <h2 id="label4">temp</h2>
+            </div>
             <Droppable droppableId="coaster-list">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
@@ -118,9 +119,9 @@ function App() {
                 </div>
               )}
             </Droppable>
+            </div>
           </DragDropContext>
         </div>
-      </div>
     </>
   );
 }

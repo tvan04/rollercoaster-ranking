@@ -7,7 +7,7 @@
   font-weight: 500;
   font-family: inherit;
   background-color: #fdfdfd;
-  cursor: pointer;
+  cursor: grab;
   transition: border-color 0.25s;
   margin: 1em;
   align-items: center;
@@ -55,7 +55,7 @@ button {
   transition: border-color 0.25s;
 }
 
-button:hover {
+.buttons button:hover {
   background-color: #fe3f3f;
 }
 

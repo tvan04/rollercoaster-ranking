@@ -53,3 +53,8 @@
   font-size: 14px;
   color: #888;
 }
+
+
+#add button:hover {
+  background-color: #939393;
+}
