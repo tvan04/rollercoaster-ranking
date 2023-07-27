@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Coaster from "./components/Coaster";
 import Searchbar from "./components/Searchbar";
-import { signInWithGoogle } from "./Firebase";
+import { signInWithGoogle, signOutWithGoogle } from "./Firebase";
 
 function App() {
   //Where the coasters selected from the searchbar are stored
+  const [user, setUser] = useState(null);
   const [selectedCoasters, setSelectedCoasters] = useState([]);
 
   //Function to add a coaster to the selectedCoasters array
@@ -63,16 +64,50 @@ function App() {
     setSelectedCoasters(updatedCoasters);
   };
 
+  // Use useEffect to check if a user is signed in or signed out
+  const handleSignIn = () => {
+    signInWithGoogle()
+      .then((signedInUser) => {
+        setUser(signedInUser); // Update the user state with the signed-in user
+      })
+      .catch((error) => {
+        // Handle sign-in errors here
+        console.error("Error signing in:", error);
+      });
+  };
+
+  // Event handler for the "Sign Out" button click
+  const handleSignOut = () => {
+    signOutWithGoogle().then(() => {
+      setUser(null);
+    });
+  };
+
   return (
     <>
       <div className="header">
-      <button onClick={signInWithGoogle}>Sign in with Google</button>
+        {/* Conditionally render profile picture and sign-out button if the user is signed in */}
+        {user ? (
+          <div className="signedIn">
+            <div>
+              <img
+                src={user.photoURL}
+                alt="Profile"
+                style={{ width: "50px", height: "50px", borderRadius: "50%" }}
+              />
+            </div>
+            <button onClick={handleSignOut}>Sign Out</button>
+          </div>
+        ) : (
+          <div className="signedOut">
+            <button onClick={handleSignIn}>Sign in with Google</button>
+          </div>
+        )}
         <h1>Rollercoaster Ranking</h1>
         <p>
           Rank your favorite rollercoasters! Search and select the rollercoaster
           you want to rank and drag it to your desired position.
         </p>
-        
       </div>
 
       <div className="container">
@@ -119,9 +154,9 @@ function App() {
                 </div>
               )}
             </Droppable>
-            </div>
-          </DragDropContext>
-        </div>
+          </div>
+        </DragDropContext>
+      </div>
     </>
   );
 }

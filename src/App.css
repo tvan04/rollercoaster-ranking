@@ -15,15 +15,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+
+.signedIn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signedIn .profile-img {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signedIn button {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
 .header {
-  text-align: center;
+  align-items: center;
   border: 1px solid #ccc;
   display: flex;
   justify-content: center;
   flex-direction: column;
 }
 
-.header button {
+.signedOut button {
   margin: 10px;
   padding: 10px;
   border: 1px solid #ccc;
@@ -33,8 +58,6 @@ body {
   position: absolute;
   top: 0;
   right: 0;
-
-  
 }
 h1 {
   font-size: 3.2em;
@@ -98,4 +121,3 @@ h1 {
     background-color: #f9f9f9;
   }
 }
-

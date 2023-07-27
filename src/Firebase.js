@@ -15,7 +15,7 @@ const firebaseConfig = {
   storageBucket: "rollercoaster-ranking-45bb7.appspot.com",
   messagingSenderId: "916119171190",
   appId: "1:916119171190:web:5dfe7a2f62bfe288046f57",
-  measurementId: "G-3DKL6TZ72T"
+  measurementId: "G-3DKL6TZ72T",
 };
 
 // Initialize Firebase
@@ -26,16 +26,20 @@ const analytics = getAnalytics(app);
 const provider = new GoogleAuthProvider();
 
 export const signInWithGoogle = () => {
-    signInWithPopup(auth, provider)
+  return signInWithPopup(auth, provider)
     .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        const user = result.user;
-        console.log(user);
-    }).catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        const email = error.email;
-        const credential = GoogleAuthProvider.credentialFromError(error);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+      const user = result.user;
+      return user;
+      
+    })
+    .catch((error) => {
+      console.error("Sign in error:", error.message)
+      throw error;
     });
-}
+};
+
+export const signOutWithGoogle = () => {
+  return auth.signOut();
+};
