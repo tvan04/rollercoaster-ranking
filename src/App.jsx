@@ -64,7 +64,14 @@ function App() {
     setSelectedCoasters(updatedCoasters);
   };
 
-  // Use useEffect to check if a user is signed in or signed out
+  //check if user is already signed in
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const handleSignIn = () => {
     signInWithGoogle()
       .then((signedInUser) => {
@@ -86,7 +93,6 @@ function App() {
   return (
     <>
       <div className="header">
-        {/* Conditionally render profile picture and sign-out button if the user is signed in */}
         {user ? (
           <div className="signedIn">
             <div>

@@ -31,15 +31,16 @@ export const signInWithGoogle = () => {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
       const user = result.user;
+      localStorage.setItem("user", JSON.stringify(user));
       return user;
-      
     })
     .catch((error) => {
-      console.error("Sign in error:", error.message)
+      console.error("Sign in error:", error.message);
       throw error;
     });
 };
 
 export const signOutWithGoogle = () => {
+  localStorage.removeItem("user");
   return auth.signOut();
 };
