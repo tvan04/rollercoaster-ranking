@@ -62,13 +62,35 @@ function App() {
 
     // Update the state with the rearranged and updated selectedCoasters array
     setSelectedCoasters(updatedCoasters);
+
+    const userId = user ? user.uid : null; // Assuming you have the user object with a uid property
+    if (userId) {
+      axios
+        .post(`/api/coasters/${userId}`, updatedCoasters)
+        .then((response) => {
+          console.log(response.data); // Coasters saved successfully
+        })
+        .catch((error) => {
+          console.error("Error saving coasters:", error);
+        });
+    }
   };
 
   //check if user is already signed in
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const user = JSON.parse(storedUser);
+      setUser(user);
+      const userId = user.uid;
+      axios
+        .get(`/api/coasters/${userId}`)
+        .then((response) => {
+          setSelectedCoasters(response.data);
+        })
+        .catch((error) => {
+          console.error("Error retrieving coasters:", error);
+        });
     }
   }, []);
 
