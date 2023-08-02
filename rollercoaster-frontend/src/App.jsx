@@ -84,6 +84,7 @@ function App() {
   };
   //check if user is already signed in
   useEffect(() => {
+    //get item from firebase persistence auth instead of user
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const user = JSON.parse(storedUser);

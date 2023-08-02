@@ -4,19 +4,28 @@ const pool = require("./db");
 const admin = require("firebase-admin");
 const serviceAccount = require("./firebase/rollercoaster-ranking-45bb7-firebase-adminsdk-lds5b-371cbdbc9f.json");
 const port = 5000;
+const cors = require("cors");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+const corsSettings = {
+  origin: "http://localhost:5173", // Add your allowed origin here
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+};
+
+app.use(cors(corsSettings));
 app.use(express.json());
 
 // Save selected coasters for a specific user
-app.post("/:userid", async (req, res) => {
+app.post("/api/coasters/:userid", async (req, res) => {
   const userId = req.params.userid;
   const selectedCoasters = req.body;
 
   try {
+    const idToken = req.headers.authorization.split(" ")[1];
     // Verify the user's token
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const authenticatedUserId = decodedToken.uid;
@@ -44,10 +53,11 @@ app.post("/:userid", async (req, res) => {
 });
 
 // Retrieve selected coasters for a specific user
-app.get("/:userid", async (req, res) => {
+app.get("/api/coasters/:userid", async (req, res) => {
   const userId = req.params.userid;
 
   try {
+    const idToken = req.headers.authorization.split(" ")[1];
     // Verify the user's token
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const authenticatedUserId = decodedToken.uid;
@@ -74,4 +84,3 @@ app.get("/:userid", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
