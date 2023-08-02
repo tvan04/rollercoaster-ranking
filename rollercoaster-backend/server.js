@@ -1,16 +1,31 @@
 const express = require("express");
-const router = express();
+const app = express();
 const pool = require("./db");
+const admin = require("firebase-admin");
+const serviceAccount = require("./firebase/rollercoaster-ranking-45bb7-firebase-adminsdk-lds5b-371cbdbc9f.json");
 const port = 5000;
 
-router.use(express.json());
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+app.use(express.json());
 
 // Save selected coasters for a specific user
-router.post("/:userid", async (req, res) => {
+app.post("/:userid", async (req, res) => {
   const userId = req.params.userid;
   const selectedCoasters = req.body;
 
   try {
+    // Verify the user's token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const authenticatedUserId = decodedToken.uid;
+
+    // Ensure that the authenticated user matches the requested user ID
+    if (authenticatedUserId !== userId) {
+      return res.status(403).json({ error: "Unauthorized access." });
+    }
+
     await pool.query("DELETE FROM coasters WHERE userid = $1", [userId]);
 
     for (const coaster of selectedCoasters) {
@@ -29,10 +44,18 @@ router.post("/:userid", async (req, res) => {
 });
 
 // Retrieve selected coasters for a specific user
-router.get("/:userid", async (req, res) => {
+app.get("/:userid", async (req, res) => {
   const userId = req.params.userid;
 
   try {
+    // Verify the user's token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const authenticatedUserId = decodedToken.uid;
+
+    // Ensure that the authenticated user matches the requested user ID
+    if (authenticatedUserId !== userId) {
+      return res.status(403).json({ error: "Unauthorized access." });
+    }
     const result = await pool.query(
       "SELECT id, name, park, rank FROM coasters WHERE userid = $1 ORDER BY rank",
       [userId]
@@ -42,10 +65,13 @@ router.get("/:userid", async (req, res) => {
     res.status(200).json(selectedCoasters);
   } catch (error) {
     console.error("Error retrieving coasters:", error);
-    res.status(500).json({ error: "An error occurred while retrieving coasters." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while retrieving coasters." });
   }
 });
 
-router.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+

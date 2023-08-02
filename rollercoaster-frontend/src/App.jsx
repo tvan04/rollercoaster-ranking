@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Coaster from "./components/Coaster";
 import Searchbar from "./components/Searchbar";
 import { signInWithGoogle, signOutWithGoogle } from "./Firebase";
+import axios from "axios";
 
 function App() {
   //Where the coasters selected from the searchbar are stored
@@ -64,9 +65,15 @@ function App() {
     setSelectedCoasters(updatedCoasters);
 
     const userId = user ? user.uid : null; // Assuming you have the user object with a uid property
-    if (userId) {
+    const token = localStorage.getItem("token");
+
+    if (userId && token) {
       axios
-        .post(`/api/coasters/${userId}`, updatedCoasters)
+        .post(`/api/coasters/${userId}`, updatedCoasters, {
+          headers: {
+            Authorization: token,
+          },
+        })
         .then((response) => {
           console.log(response.data); // Coasters saved successfully
         })
@@ -75,7 +82,6 @@ function App() {
         });
     }
   };
-
   //check if user is already signed in
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -98,6 +104,11 @@ function App() {
     signInWithGoogle()
       .then((signedInUser) => {
         setUser(signedInUser); // Update the user state with the signed-in user
+
+        user.getIdToken().then((idToken) => {
+          localStorage.setItem("user", JSON.stringify(signedInUser));
+          localStorage.setItem("token", idToken); // Store the user's ID token in local storage
+        });
       })
       .catch((error) => {
         // Handle sign-in errors here
