@@ -10,20 +10,55 @@ function App() {
   //Where the coasters selected from the searchbar are stored
   const [user, setUser] = useState(null);
   const [selectedCoasters, setSelectedCoasters] = useState([]);
-
-  //Function to add a coaster to the selectedCoasters array
-  const handleCoasterSelection = (coaster) => {
-    setSelectedCoasters((prevSelectedCoasters) => [
-      ...prevSelectedCoasters,
-      coaster,
-    ]);
+  const token = localStorage.getItem("token");
+  //function to add a coaster to the database and selectedCoasters array
+  const addCoaster = (coaster) => {
+    if (user && token) {
+      axios
+        .post(`http://localhost:5000/api/users/${user.uid}/coasters`, coaster, {
+          headers: {
+            Authorization: token,
+          },
+        })
+        .then((response) => {
+          // Coaster added successfully, update the frontend state
+          setSelectedCoasters((prevSelectedCoasters) => [
+            ...prevSelectedCoasters,
+            response.data, // Assuming response.data contains the new coaster object
+          ]);
+          console.log(selectedCoasters);
+        })
+        .catch((error) => {
+          console.error("Error adding coaster:", error);
+        });
+    }
   };
 
-  //Function to remove a coaster from the selectedCoasters array
-  const handleDeleteCoaster = (id) => {
-    setSelectedCoasters((prevSelectedCoasters) =>
-      prevSelectedCoasters.filter((coaster) => coaster.id !== id)
-    );
+  //Function to remove a coaster from the database and selectedCoasters array
+  const deleteCoaster = (coaster_id) => {
+    if (user && token) {
+      axios
+        .delete(
+          `http://localhost:5000/api/users/${user.uid}/coasters/${coaster_id}`,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        )
+        .then((response) => {
+          // Coaster deleted successfully, update the frontend state
+          setSelectedCoasters((prevSelectedCoasters) =>
+            prevSelectedCoasters.filter(
+              (coaster) => coaster.id !== coaster_id
+            )
+          );
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error("Error deleting coaster:", error);
+        });
+    }
   };
 
   //Function to sort the selectedCoasters array by rank
@@ -47,7 +82,7 @@ function App() {
 
     const updatedCoasters = Array.from(selectedCoasters);
     const movedCoaster = updatedCoasters.find(
-      (coaster) => coaster.id.toString() === draggableId
+      (coaster) => coaster.coaster_id.toString() === draggableId
     );
 
     const startIndex = source.index;
@@ -65,62 +100,93 @@ function App() {
     setSelectedCoasters(updatedCoasters);
 
     const userId = user ? user.uid : null; // Assuming you have the user object with a uid property
-    const token = localStorage.getItem("token");
 
-    if (userId && token) {
+    if (user && token) {
       axios
-        .post(`/api/coasters/${userId}`, updatedCoasters, {
-          headers: {
-            Authorization: token,
-          },
-        })
+        .put(
+          `http://localhost:5000/api/users/${user.uid}/coasters`,
+          sortedSelectedCoasters,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        )
         .then((response) => {
-          console.log(response.data); // Coasters saved successfully
+          console.log(response.data); // Coasters updated successfully
         })
         .catch((error) => {
-          console.error("Error saving coasters:", error);
+          console.error("Error updating coasters:", error);
         });
     }
   };
   //check if user is already signed in
   useEffect(() => {
-    //get item from firebase persistence auth instead of user
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setUser(user);
-      const userId = user.uid;
       axios
-        .get(`/api/coasters/${userId}`)
+        .get(`http://localhost:5000/api/users/${user.uid}/coasters`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         .then((response) => {
-          setSelectedCoasters(response.data);
+          setSelectedCoasters((prevSelectedCoasters) => [
+            ...prevSelectedCoasters,
+            ...response.data,
+          ]);
         })
         .catch((error) => {
           console.error("Error retrieving coasters:", error);
         });
     }
+    console.log(selectedCoasters);
   }, []);
 
   const handleSignIn = () => {
     signInWithGoogle()
       .then((signedInUser) => {
-        setUser(signedInUser); // Update the user state with the signed-in user
-
-        user.getIdToken().then((idToken) => {
-          localStorage.setItem("user", JSON.stringify(signedInUser));
-          localStorage.setItem("token", idToken); // Store the user's ID token in local storage
-        });
+        // Check if the user already exists in the database
+        const userEmail = signedInUser.email;
+        axios
+          .get(`http://localhost:5000/api/users/${userEmail}`)
+          .then((response) => {
+            if (response.data.exists) {
+              setUser(signedInUser);
+            } else {
+              // User does not exist in the database, create a new user entry
+              axios
+                .post("http://localhost:5000/api/users", {
+                  userId: signedInUser.uid,
+                  name: signedInUser.displayName,
+                  email: signedInUser.email,
+                })
+                .then((response) => {
+                  setUser(signedInUser);
+                })
+                .catch((error) => {
+                  console.error("Error creating user:", error);
+                });
+            }
+          })
+          .catch((error) => {
+            console.error("Error verifying user existence:", error);
+          });
       })
       .catch((error) => {
         // Handle sign-in errors here
         console.error("Error signing in:", error);
       });
   };
-
   // Event handler for the "Sign Out" button click
   const handleSignOut = () => {
     signOutWithGoogle().then(() => {
       setUser(null);
+      setSelectedCoasters([]);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
     });
   };
 
@@ -153,7 +219,7 @@ function App() {
       <div className="container">
         <div id="search">
           <h2>Add Coasters</h2>
-          <Searchbar onCoasterSelection={handleCoasterSelection} />
+          <Searchbar onCoasterSelection={addCoaster} />
         </div>
         <DragDropContext onDragEnd={onDragEnd}>
           <div id="coasters">
@@ -182,9 +248,9 @@ function App() {
                             key={coaster.id}
                             id={coaster.id}
                             name={coaster.name}
-                            park={coaster.park}
+                            park={coaster.park.name}
                             rank={coaster.rank}
-                            onDeleteCoaster={handleDeleteCoaster}
+                            onDeleteCoaster={deleteCoaster}
                           />
                         </div>
                       )}

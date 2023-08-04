@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -25,6 +26,7 @@ const analytics = getAnalytics(app);
 
 const provider = new GoogleAuthProvider();
 
+
 export const signInWithGoogle = () => {
   return signInWithPopup(auth, provider)
     .then((result) => {
@@ -32,6 +34,7 @@ export const signInWithGoogle = () => {
       const token = credential.accessToken;
       const user = result.user;
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
       return user;
     })
     .catch((error) => {
