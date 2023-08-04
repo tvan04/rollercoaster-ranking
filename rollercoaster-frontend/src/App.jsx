@@ -10,6 +10,7 @@ function App() {
   //Where the coasters selected from the searchbar are stored
   const [user, setUser] = useState(null);
   const [selectedCoasters, setSelectedCoasters] = useState([]);
+  const [coastersFetched, setCoastersFetched] = useState(false);
   const token = localStorage.getItem("token");
   //function to add a coaster to the database and selectedCoasters array
   const addCoaster = (coaster) => {
@@ -17,19 +18,17 @@ function App() {
       axios
         .post(`http://localhost:5000/api/users/${user.uid}/coasters`, coaster, {
           headers: {
-            Authorization: token,
+            Authorization: `Bearer ${token}`,
           },
         })
         .then((response) => {
-          // Coaster added successfully, update the frontend state
           setSelectedCoasters((prevSelectedCoasters) => [
             ...prevSelectedCoasters,
-            response.data, // Assuming response.data contains the new coaster object
+            response.data,
           ]);
-          console.log(selectedCoasters);
         })
         .catch((error) => {
-          console.error("Error adding coaster:", error);
+          console.error("Coaster Already Exists", error);
         });
     }
   };
@@ -42,21 +41,39 @@ function App() {
           `http://localhost:5000/api/users/${user.uid}/coasters/${coaster_id}`,
           {
             headers: {
-              Authorization: token,
+              Authorization: `Bearer ${token}`,
             },
           }
         )
         .then((response) => {
           // Coaster deleted successfully, update the frontend state
           setSelectedCoasters((prevSelectedCoasters) =>
-            prevSelectedCoasters.filter(
-              (coaster) => coaster.id !== coaster_id
-            )
+            prevSelectedCoasters.filter((coaster) => coaster.id !== coaster_id)
           );
           console.log(response.data);
         })
         .catch((error) => {
           console.error("Error deleting coaster:", error);
+        });
+    }
+  };
+
+  const getCoasters = async (user) => {
+    if (user && !coastersFetched) {
+      axios
+        .get(`http://localhost:5000/api/users/${user.uid}/coasters`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setSelectedCoasters((prevSelectedCoasters) => [
+            ...prevSelectedCoasters,
+            ...response.data,
+          ]);
+        })
+        .catch((error) => {
+          console.error("Error retrieving coasters:", error);
         });
     }
   };
@@ -82,7 +99,7 @@ function App() {
 
     const updatedCoasters = Array.from(selectedCoasters);
     const movedCoaster = updatedCoasters.find(
-      (coaster) => coaster.coaster_id.toString() === draggableId
+      (coaster) => coaster.id.toString() === draggableId
     );
 
     const startIndex = source.index;
@@ -108,7 +125,7 @@ function App() {
           sortedSelectedCoasters,
           {
             headers: {
-              Authorization: token,
+              Authorization: `Bearer ${token}`,
             },
           }
         )
@@ -126,65 +143,44 @@ function App() {
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setUser(user);
-      axios
-        .get(`http://localhost:5000/api/users/${user.uid}/coasters`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          setSelectedCoasters((prevSelectedCoasters) => [
-            ...prevSelectedCoasters,
-            ...response.data,
-          ]);
-        })
-        .catch((error) => {
-          console.error("Error retrieving coasters:", error);
-        });
+      getCoasters(user);
+      setCoastersFetched(true);
     }
-    console.log(selectedCoasters);
   }, []);
 
-  const handleSignIn = () => {
-    signInWithGoogle()
-      .then((signedInUser) => {
-        // Check if the user already exists in the database
-        const userEmail = signedInUser.email;
-        axios
-          .get(`http://localhost:5000/api/users/${userEmail}`)
-          .then((response) => {
-            if (response.data.exists) {
-              setUser(signedInUser);
-            } else {
-              // User does not exist in the database, create a new user entry
-              axios
-                .post("http://localhost:5000/api/users", {
-                  userId: signedInUser.uid,
-                  name: signedInUser.displayName,
-                  email: signedInUser.email,
-                })
-                .then((response) => {
-                  setUser(signedInUser);
-                })
-                .catch((error) => {
-                  console.error("Error creating user:", error);
-                });
-            }
-          })
-          .catch((error) => {
-            console.error("Error verifying user existence:", error);
-          });
-      })
-      .catch((error) => {
-        // Handle sign-in errors here
-        console.error("Error signing in:", error);
-      });
+  const handleSignIn = async () => {
+    try {
+      const signedInUser = await signInWithGoogle();
+
+      // Check if the user already exists in the database
+      const userEmail = signedInUser.email;
+      const response = await axios.get(
+        `http://localhost:5000/api/users/${userEmail}`
+      );
+
+      if (response.data.exists) {
+        setUser(signedInUser);
+        await getCoasters(signedInUser);
+      } else {
+        // User does not exist in the database, create a new user entry
+        await axios.post("http://localhost:5000/api/users", {
+          userId: signedInUser.uid,
+          name: signedInUser.displayName,
+          email: signedInUser.email,
+        });
+        setUser(signedInUser);
+      }
+    } catch (error) {
+      // Handle sign-in errors here
+      console.error("Error signing in:", error);
+    }
   };
   // Event handler for the "Sign Out" button click
   const handleSignOut = () => {
     signOutWithGoogle().then(() => {
       setUser(null);
       setSelectedCoasters([]);
+      setCoastersFetched(false);
       localStorage.removeItem("user");
       localStorage.removeItem("token");
     });

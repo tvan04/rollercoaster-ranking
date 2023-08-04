@@ -12,7 +12,7 @@ admin.initializeApp({
 
 const verifyToken = async (req, res, next) => {
   try {
-    const idToken = req.headers.authorization.split(" ")[1];
+    const idToken = req.headers.authorization.split("Bearer ")[1];
     // Verify the user's token
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const authenticatedUserId = decodedToken.uid;
@@ -53,32 +53,41 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
-// Add a new coaster for a specific user
-app.post("/api/users/:userid/coasters", async (req, res) => {
+// Add a new coaster for a specific user without allowing duplicates
+app.post("/api/users/:userid/coasters", verifyToken, async (req, res) => {
   try {
     const userId = req.params.userid;
     const { name, park, rank, id } = req.body;
     const parkId = park["@id"];
     const parkName = park.name;
-    const newCoaster = await pool.query(
-      "INSERT INTO coasters (user_id, coaster_id, park_id, coaster_name, park_name, rank) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [userId, id, parkId, name, parkName, rank]
+    const existingCoaster = await pool.query(
+      "SELECT * FROM coasters WHERE user_id = $1 AND coaster_id = $2",
+      [userId, id]
     );
+    if (existingCoaster.rows.length > 0) {
+      return res
+        .status(400)
+        .json({ error: "Coaster already exists for user." });
+    } else {
+      const newCoaster = await pool.query(
+        "INSERT INTO coasters (user_id, coaster_id, park_id, coaster_name, park_name, rank) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [userId, id, parkId, name, parkName, rank]
+      );
 
-    const formattedCoaster = {
-      "@id": `/api/coasters/${newCoaster.rows[0].coaster_id}`,
-      "@type": "Coaster",
-      id: newCoaster.rows[0].coaster_id,
-      name: newCoaster.rows[0].coaster_name,
-      park: {
-        "@id": newCoaster.rows[0].park_id,
-        "@type": "Park",
-        name: newCoaster.rows[0].park_name,
-      },
-      rank: newCoaster.rows[0].rank,
-    };
-    console.log(formattedCoaster);
-    res.status(201).json(formattedCoaster);
+      const formattedCoaster = {
+        "@id": `/api/coasters/${newCoaster.rows[0].coaster_id}`,
+        "@type": "Coaster",
+        id: newCoaster.rows[0].coaster_id,
+        name: newCoaster.rows[0].coaster_name,
+        park: {
+          "@id": newCoaster.rows[0].park_id,
+          "@type": "Park",
+          name: newCoaster.rows[0].park_name,
+        },
+        rank: newCoaster.rows[0].rank,
+      };
+      res.status(201).json(formattedCoaster);
+    }
   } catch (error) {
     console.error("Error adding coaster:", error);
     res
@@ -108,7 +117,6 @@ app.get("/api/users/:userid/coasters", async (req, res) => {
       },
       rank: coaster.rank,
     }));
-    console.log(formattedCoasters);
     res.status(200).json(formattedCoasters);
   } catch (error) {
     console.error("Error retrieving coasters:", error);
@@ -134,7 +142,7 @@ app.get("/api/users/:email", async (req, res) => {
 });
 
 // Update coaster ranks for a specific user
-app.put("/api/users/:userid/coasters", async (req, res) => {
+app.put("/api/users/:userid/coasters", verifyToken, async (req, res) => {
   try {
     const userId = req.params.userid;
     const coasters = req.body;
@@ -161,26 +169,29 @@ app.put("/api/users/:userid/coasters", async (req, res) => {
 });
 
 // Delete a coaster for a specific user
-app.delete("/api/users/:userid/coasters/:coasterid", async (req, res) => {
-  try {
-    const userId = req.params.userid;
-    
-    const coasterId = req.params.coasterid;
-    console.log(userId);
-    console.log(coasterId);
-    await pool.query(
-      "DELETE FROM coasters WHERE user_id = $1 AND coaster_id = $2",
-      [userId, coasterId]
-    );
+app.delete(
+  "/api/users/:userid/coasters/:coasterid",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const userId = req.params.userid;
 
-    res.status(200).json({ message: "Coaster deleted successfully." });
-  } catch (error) {
-    console.error("Error deleting coaster:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while deleting the coaster." });
+      const coasterId = req.params.coasterid;
+
+      await pool.query(
+        "DELETE FROM coasters WHERE user_id = $1 AND coaster_id = $2",
+        [userId, coasterId]
+      );
+
+      res.status(200).json({ message: "Coaster deleted successfully." });
+    } catch (error) {
+      console.error("Error deleting coaster:", error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while deleting the coaster." });
+    }
   }
-});
+);
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
