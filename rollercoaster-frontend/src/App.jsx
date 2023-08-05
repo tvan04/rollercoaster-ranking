@@ -3,15 +3,22 @@ import "./App.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Coaster from "./components/Coaster";
 import Searchbar from "./components/Searchbar";
-import { signInWithGoogle, signOutWithGoogle } from "./Firebase";
+import {
+  signInWithGoogle,
+  signOutWithGoogle,
+  refreshIdToken,
+} from "./Firebase";
 import axios from "axios";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 function App() {
   //Where the coasters selected from the searchbar are stored
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [selectedCoasters, setSelectedCoasters] = useState([]);
   const [coastersFetched, setCoastersFetched] = useState(false);
-  const token = localStorage.getItem("token");
   //function to add a coaster to the database and selectedCoasters array
   const addCoaster = (coaster) => {
     if (user && token) {
@@ -60,21 +67,24 @@ function App() {
 
   const getCoasters = async (user) => {
     if (user && !coastersFetched) {
-      axios
-        .get(`http://localhost:5000/api/users/${user.uid}/coasters`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          setSelectedCoasters((prevSelectedCoasters) => [
-            ...prevSelectedCoasters,
-            ...response.data,
-          ]);
-        })
-        .catch((error) => {
-          console.error("Error retrieving coasters:", error);
-        });
+      try {
+        await refreshIdToken();
+        const response = await axios.get(
+          `http://localhost:5000/api/users/${user.uid}/coasters`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setSelectedCoasters((prevSelectedCoasters) => [
+          ...prevSelectedCoasters,
+          ...response.data,
+        ]);
+        setCoastersFetched(true);
+      } catch (error) {
+        console.error("Error retrieving coasters:", error);
+      }
     }
   };
 
@@ -137,13 +147,13 @@ function App() {
         });
     }
   };
-  //check if user is already signed in
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setUser(user);
-      getCoasters(user);
+    const userCookie = cookies.get("user");
+    const tokenCookie = cookies.get("token");
+    if (userCookie) {
+      setUser(userCookie);
+      setToken(tokenCookie);
+      getCoasters(userCookie);
       setCoastersFetched(true);
     }
   }, []);
@@ -168,10 +178,13 @@ function App() {
           name: signedInUser.displayName,
           email: signedInUser.email,
         });
-        setUser(signedInUser);
+        setUser(signedInUser); 
       }
+      const idToken = await signedInUser.getIdToken();
+      cookies.set("user", signedInUser, { path: "/" });
+      cookies.set("token", idToken, { path: "/" });
+      setToken(idToken);
     } catch (error) {
-      // Handle sign-in errors here
       console.error("Error signing in:", error);
     }
   };
@@ -181,8 +194,7 @@ function App() {
       setUser(null);
       setSelectedCoasters([]);
       setCoastersFetched(false);
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      cookies.remove("user", { path: "/" });
     });
   };
 

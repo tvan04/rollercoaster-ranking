@@ -7,6 +7,7 @@ import {
   signInWithPopup,
   getIdToken,
 } from "firebase/auth";
+import Cookies from "universal-cookie";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -27,6 +28,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 const analytics = getAnalytics(app);
+const cookies = new Cookies();
 
 const provider = new GoogleAuthProvider();
 
@@ -38,8 +40,9 @@ export const signInWithGoogle = () => {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const idToken = await getIdToken(auth.currentUser);
       const user = result.user;
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", idToken);
+
+      cookies.set("user", user, { path: "/" });
+      cookies.set("token", idToken, { path: "/" });
       return user;
     })
     .catch((error) => {
@@ -49,6 +52,20 @@ export const signInWithGoogle = () => {
 };
 
 export const signOutWithGoogle = () => {
-  localStorage.removeItem("user");
+  cookies.remove("user", { path: "/" });
+  cookies.remove("token", { path: "/" });
   return auth.signOut();
+};
+
+export const refreshIdToken = async () => {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const idToken = await getIdToken(user);
+      cookies.set("token", idToken, { path: "/" });
+      console.log("ID token refreshed successfully.");
+    }
+  } catch (error) {
+    console.error("Error refreshing ID token:", error);
+  }
 };

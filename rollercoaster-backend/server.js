@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const pool = require("./db");
 const admin = require("firebase-admin");
+const cookieParser = require("cookie-parser");
 const serviceAccount = require("./firebase/rollercoaster-ranking-45bb7-firebase-adminsdk-lds5b-371cbdbc9f.json");
 const port = 5000;
 const cors = require("cors");
@@ -17,6 +18,9 @@ const verifyToken = async (req, res, next) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const authenticatedUserId = decodedToken.uid;
 
+    res.cookie('session_id', authenticatedUserId,  {
+      httpOnly: true,
+    })
     // Attach the authenticated user ID to the request object for later use
     req.userId = authenticatedUserId;
     next();
@@ -32,6 +36,7 @@ const corsSettings = {
   credentials: true,
 };
 
+app.use(cookieParser());
 app.use(cors(corsSettings));
 app.use(express.json());
 

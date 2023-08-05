@@ -109,7 +109,7 @@ const Searchbar = ({ onCoasterSelection }) => {
 
       <div id="rank">
         <input
-          type="text"
+          type="integer"
           placeholder="Enter rank"
           value={rankInput}
           onChange={(e) => setRankInput(e.target.value)}
