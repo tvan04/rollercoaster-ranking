@@ -1,0 +1,14 @@
+version: 
+services:
+  web:
+    build: ./rollercoaster-frontend  
+    container_name: rollercoaster-frontend
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+  db:
+    image: postgres
+    container_name: rollercoaster-backend
